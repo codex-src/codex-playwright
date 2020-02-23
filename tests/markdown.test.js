@@ -1,4 +1,5 @@
-import * as ppt from "./playwright"
+import * as ppt from "../lib/playwright"
+import runeCount from "../lib/runeCount"
 
 let page = null
 let done = null
@@ -13,133 +14,124 @@ afterAll(async () => {
 	await done()
 })
 
-test("can type and delete headers", async () => {
-	const str = "# Hello, world! 😀\n## Hello, world! 😀\n### Hello, world! 😀\n#### Hello, world! 😀\n##### Hello, world! 😀\n###### Hello, world! 😀"
-	await ppt.clear(page)
-	await ppt.type(page, str)
-	let data = await ppt.innerText(page)
-	expect(data).toBe(str)
-	for (let index = 0; index < 128; index++) {
-		await ppt.backspaceChar(page)
-	}
-	data = await ppt.innerText(page)
-	expect(data).toBe("")
+beforeEach(async () => {
+	await page.focus("#editor")
+	await page.clear()
 })
 
-test("can type and delete comments", async () => {
-	const str = "// Hello, world! 😀"
-	await ppt.clear(page)
-	await ppt.type(page, str)
-	let data = await ppt.innerText(page)
-	expect(data).toBe(str)
-	for (let index = 0; index < 18; index++) {
-		await ppt.backspaceChar(page)
-	}
-	data = await ppt.innerText(page)
-	expect(data).toBe("")
+test("can type, backspace, and delete headers", async () => {
+	const data = "# Hello, world! 😀\n## Hello, world! 😀\n### Hello, world! 😀\n#### Hello, world! 😀\n##### Hello, world! 😀\n###### Hello, world! 😀"
+	const count = runeCount(data)
+	await page.type(data)
+	expect(await page.getCodex("#editor")).toBe(data)
+	await page.backspace(count)
+	expect(await page.getCodex("#editor")).toBe("")
+	await page.type(data)
+	await page.left(count)
+	await page.delete(count)
+	expect(await page.getCodex("#editor")).toBe("")
 })
 
-test("can type and delete blockquotes", async () => {
-	const str = "> Hello, world! 😀\n> Hello, world! 😀"
-	await ppt.clear(page)
-	await ppt.type(page, str)
-	let data = await ppt.innerText(page)
-	expect(data).toBe(str)
-	for (let index = 0; index < 35; index++) {
-		await ppt.backspaceChar(page)
-	}
-	data = await ppt.innerText(page)
-	expect(data).toBe("")
+test("can type, backspace, and delete blockquotes", async () => {
+	const data = "> Hello, world! 😀\n>\n> Hello, world! 😀"
+	const count = runeCount(data)
+	await page.type(data)
+	expect(await page.getCodex("#editor")).toBe(data)
+	await page.backspace(count)
+	expect(await page.getCodex("#editor")).toBe("")
+	await page.type(data)
+	await page.left(count)
+	await page.delete(count)
+	expect(await page.getCodex("#editor")).toBe("")
 })
 
-// FIXME
-test("can type and delete code blocks", async () => {
-	const str = "```Hello, world! 😀```\n```\nHello, world! 😀\n```"
-	await ppt.clear(page)
-	await ppt.type(page, str)
-	let data = await ppt.innerText(page)
-	expect(data).toBe(str)
-	for (let index = 0; index < 45; index++) {
-		await ppt.backspaceChar(page)
-	}
-	data = await ppt.innerText(page)
-	expect(data).toBe("")
+test("can type, backspace, and delete code blocks", async () => {
+	const data = "```\nHello, world! 😀\n```\n```go\nHello, world! 😀\n```"
+	const count = runeCount(data)
+	await page.type(data)
+	expect(await page.getCodex("#editor")).toBe(data)
+	await page.backspace(count)
+	expect(await page.getCodex("#editor")).toBe("")
+	await page.type(data)
+	await page.left(count)
+	await page.delete(count)
+	expect(await page.getCodex("#editor")).toBe("")
 })
 
-test("can type and delete breaks", async () => {
-	const str = "***\n---"
-	await ppt.clear(page)
-	await ppt.type(page, str)
-	let data = await ppt.innerText(page)
-	expect(data).toBe(str)
-	for (let index = 0; index < 7; index++) {
-		await ppt.backspaceChar(page)
-	}
-	data = await ppt.innerText(page)
-	expect(data).toBe("")
+test("can type, backspace, and delete code blocks", async () => {
+	const data = "---\n***"
+	const count = runeCount(data)
+	await page.type(data)
+	expect(await page.getCodex("#editor")).toBe(data)
+	await page.backspace(count)
+	expect(await page.getCodex("#editor")).toBe("")
+	await page.type(data)
+	await page.left(count)
+	await page.delete(count)
+	expect(await page.getCodex("#editor")).toBe("")
 })
 
-test("can type and delete emphasis", async () => {
-	const str = "Hello, *world*! 😀\nHello, _world_! 😀"
-	await ppt.clear(page)
-	await ppt.type(page, str)
-	let data = await ppt.innerText(page)
-	expect(data).toBe(str)
-	for (let index = 0; index < 35; index++) {
-		await ppt.backspaceChar(page)
-	}
-	data = await ppt.innerText(page)
-	expect(data).toBe("")
+test("can type, backspace, and delete emphasis", async () => {
+	const data = "Hello, _world_! 😀\nHello, *world_* 😀"
+	const count = runeCount(data)
+	await page.type(data)
+	expect(await page.getCodex("#editor")).toBe(data)
+	await page.backspace(count)
+	expect(await page.getCodex("#editor")).toBe("")
+	await page.type(data)
+	await page.left(count)
+	await page.delete(count)
+	expect(await page.getCodex("#editor")).toBe("")
 })
 
-test("can type and delete strong", async () => {
-	const str = "Hello, **world**! 😀\nHello, __world__! 😀"
-	await ppt.clear(page)
-	await ppt.type(page, str)
-	let data = await ppt.innerText(page)
-	expect(data).toBe(str)
-	for (let index = 0; index < 39; index++) {
-		await ppt.backspaceChar(page)
-	}
-	data = await ppt.innerText(page)
-	expect(data).toBe("")
+test("can type, backspace, and delete strong", async () => {
+	const data = "Hello, **world**! 😀\nHello, __world__! 😀"
+	const count = runeCount(data)
+	await page.type(data)
+	expect(await page.getCodex("#editor")).toBe(data)
+	await page.backspace(count)
+	expect(await page.getCodex("#editor")).toBe("")
+	await page.type(data)
+	await page.left(count)
+	await page.delete(count)
+	expect(await page.getCodex("#editor")).toBe("")
 })
 
-test("can type and delete strong emphasis", async () => {
-	const str = "Hello, ***world***! 😀\nHello, ___world___! 😀"
-	await ppt.clear(page)
-	await ppt.type(page, str)
-	let data = await ppt.innerText(page)
-	expect(data).toBe(str)
-	for (let index = 0; index < 45; index++) {
-		await ppt.backspaceChar(page)
-	}
-	data = await ppt.innerText(page)
-	expect(data).toBe("")
+test("can type, backspace, and delete strong emphasis", async () => {
+	const data = "Hello, ***world***! 😀\nHello, ___world___! 😀"
+	const count = runeCount(data)
+	await page.type(data)
+	expect(await page.getCodex("#editor")).toBe(data)
+	await page.backspace(count)
+	expect(await page.getCodex("#editor")).toBe("")
+	await page.type(data)
+	await page.left(count)
+	await page.delete(count)
+	expect(await page.getCodex("#editor")).toBe("")
 })
 
-test("can type and delete code", async () => {
-	const str = "Hello, `world`! 😀"
-	await ppt.clear(page)
-	await ppt.type(page, str)
-	let data = await ppt.innerText(page)
-	expect(data).toBe(str)
-	for (let index = 0; index < 18; index++) {
-		await ppt.backspaceChar(page)
-	}
-	data = await ppt.innerText(page)
-	expect(data).toBe("")
+test("can type, backspace, and delete code", async () => {
+	const data = "Hello, `world`! 😀"
+	const count = runeCount(data)
+	await page.type(data)
+	expect(await page.getCodex("#editor")).toBe(data)
+	await page.backspace(count)
+	expect(await page.getCodex("#editor")).toBe("")
+	await page.type(data)
+	await page.left(count)
+	await page.delete(count)
+	expect(await page.getCodex("#editor")).toBe("")
 })
 
-test("can type and delete strikethrough", async () => {
-	const str = "Hello, ~world~! 😀\nHello, ~~world~~! 😀"
-	await ppt.clear(page)
-	await ppt.type(page, str)
-	let data = await ppt.innerText(page)
-	expect(data).toBe(str)
-	for (let index = 0; index < 37; index++) {
-		await ppt.backspaceChar(page)
-	}
-	data = await ppt.innerText(page)
-	expect(data).toBe("")
+test("can type, backspace, and delete strikethrough", async () => {
+	const data = "Hello, ~world~! 😀\nHello, ~~world~~! 😀"
+	const count = runeCount(data)
+	await page.type(data)
+	expect(await page.getCodex("#editor")).toBe(data)
+	await page.backspace(count)
+	expect(await page.getCodex("#editor")).toBe("")
+	await page.type(data)
+	await page.left(count)
+	await page.delete(count)
+	expect(await page.getCodex("#editor")).toBe("")
 })
