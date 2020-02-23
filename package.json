@@ -8,6 +8,8 @@
     "@babel/preset-env": "^7.8.4",
     "babel-eslint": "^10.0.3",
     "babel-jest": "^25.1.0",
+    "emoji-trie": "https://github.com/codex-src/emoji-trie.js",
+    "eslint": "^6.8.0",
     "jest": "^25.1.0",
     "playwright": "0.10"
   }

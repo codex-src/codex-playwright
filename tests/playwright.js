@@ -8,7 +8,7 @@ import {
 
 const browserTypes = { Chrome, Firefox, Safari }
 
-const options = { delay: +(process.env.DELAY || 16.67) }
+const OPTIONS = { delay: +(process.env.DELAY || 16.67) }
 
 // Puppeteer:
 //
@@ -28,6 +28,17 @@ const options = { delay: +(process.env.DELAY || 16.67) }
 // 	await p.addScriptTag({ path: "./src/components/Editor/__tests/innerText.js" })
 // 	return [p, () => browser.close()]
 // }
+
+/* eslint-disable no-multi-spaces */
+const ARROW_DOWN  = "ArrowDown"
+const ARROW_LEFT  = "ArrowLeft"
+const ARROW_RIGHT = "ArrowRight"
+const ARROW_UP    = "ArrowUp"
+const BACKSPACE   = "Backspace"
+const DELETE      = "Delete"
+const MOD_ALT     = "Alt"
+const MOD_META    = "Meta"
+/* eslint-enable no-multi-spaces */
 
 // Opens a new page from a browser string and a URL.
 export async function openPage(browserStr, url) {
@@ -50,93 +61,131 @@ export async function openPage(browserStr, url) {
 		}
 		const browser = await browserType.launch(config)
 		const context = await browser.newContext()
-		const page = await context.newPage(url)
+		page = await context.newPage(url)
 		if (!config.headless && browserType === Firefox) {
 			execSync("osascript -e 'activate application \"Nightly\"'")
 		}
 		await page.setViewport({ width: 1440, height: 900 }) // , deviceScaleFactor: 2 })
-		await page.waitFor(1e3, options)
+		await page.waitFor(1e3, OPTIONS)
 		page.on("pageerror", error => expect(error).toBeNull())
-		done = browser.close // async?
+		done = browser.close
 	} catch (e) {
 		console.warn(e)
 	}
-	return [page, done]
+	const _page = new Page(page, done)
+	return [_page, done]
 }
 
-// ./src/components/Editor/helpers/innerText.js
-export async function innerText(page) {
-	return await page.$eval("#editor", node => window.getCodex(node))
-}
-
-export async function clear(page) {
-	await page.focus("#editor")
-	await page.keyboard.down("Meta")
-	await page.keyboard.press("a", options)
-	await page.keyboard.up("Meta")
-	try {
-		// https://github.com/microsoft/playwright/issues/849
-		await page.evaluate(() => document.execCommand("selectall", false, null))
-	} catch (e) {
-		// No-op
+class Page {
+	constructor(page, done) {
+		this.page = page
+		this.done = done
 	}
-	await page.keyboard.press("Backspace", options)
-}
-
-// export async function type(page, data) {
-// 	await page.keyboard.type(data, options)
-// }
-export async function type(page, data) {
-	// NOTE: Do not use page.keyboard.type for paragraphs;
-	// 😀<Enter> does not work as expected (because of
-	// onKeyDown)
-	const arr = data.split("\n")
-	for (let index = 0; index < arr.length; index++) {
-		if (index) {
-			// // https://stackoverflow.com/a/39914235
-			// await new Promise(r => setTimeout(r, 10))
-			await page.waitFor(0, options)
-			await page.keyboard.press("Enter", options)
+	async done() {
+		await this.done()
+	}
+	// (Custom)
+	async getCodex(selector) {
+		const data = await this.page.$eval(selector, node => window.getCodex(node.id))
+		return data
+	}
+	// Focuses on a selector.
+	async focus(selector) {
+		await this.page.focus(selector)
+	}
+	// Selects all character data.
+	async selectAll() {
+		await this.page.keyboard.down("Meta")
+		await this.page.keyboard.press("a")
+		await this.page.keyboard.up("Meta")
+		try {
+			// https://github.com/microsoft/playwright/issues/849
+			await this.page.evaluate(() => document.execCommand("selectall", false, null))
+		} catch (e) {
+			// No-op
 		}
-		await page.keyboard.type(arr[index], options)
 	}
-	// await page.keyboard.type(data, options)
+	// Clears character data based on a selector.
+	async clear() {
+		await this.selectAll()
+		await this.backspace()
+	}
+	// Arrows left up to count times.
+	async left(count = 1) {
+		for (let index = 0; index < count; index++) {
+			await this.page.keyboard.press(ARROW_LEFT)
+		}
+	}
+	// Arrows right up to count times.
+	async right(count = 1) {
+		for (let index = 0; index < count; index++) {
+			await this.page.keyboard.press(ARROW_RIGHT)
+		}
+	}
+	// Arrows up up to count times.
+	async up(count = 1) {
+		for (let index = 0; index < count; index++) {
+			await this.page.keyboard.press(ARROW_UP)
+		}
+	}
+	// Arrows down up to count times.
+	async down(count = 1) {
+		for (let index = 0; index < count; index++) {
+			await this.page.keyboard.press(ARROW_DOWN)
+		}
+	}
+	// Types character data.
+	async type(data) {
+		// NOTE: Do not use page.keyboard.type for paragraphs;
+		// 😀<Enter> does not work as expected (because of
+		// onKeyDown)
+		const arr = data.split("\n")
+		for (let index = 0; index < arr.length; index++) {
+			if (index) {
+				// // https://stackoverflow.com/a/39914235
+				// await new Promise(r => setTimeout(r, 10))
+				await this.page.waitFor(0)
+				await this.page.keyboard.press("Enter")
+			}
+			await this.page.keyboard.type(arr[index])
+		}
+	}
+	// Deletes up to count characters.
+	async backspace(count = 1) {
+		for (let index = 0; index < count; index++) {
+			await this.page.keyboard.press(BACKSPACE)
+		}
+	}
+	// Deletes one word.
+	async backspaceWord() {
+		await this.page.keyboard.down(MOD_ALT)
+		await this.page.keyboard.press(BACKSPACE)
+		await this.page.keyboard.up(MOD_ALT)
+	}
+	// Deletes up to count characters (forwards).
+	async delete(count = 1) {
+		for (let index = 0; index < count; index++) {
+			await this.page.keyboard.press(DELETE)
+		}
+	}
+	// Deletes one word (forwards).
+	async deleteWord() {
+		await this.page.keyboard.down(MOD_ALT)
+		await this.page.keyboard.press(DELETE)
+		await this.page.keyboard.up(MOD_ALT)
+	}
 }
 
-export async function press(page, key) {
-	await page.keyboard.press(key, options)
-}
-
-export async function backspaceChar(page) {
-	await page.keyboard.press("Backspace", options)
-}
-
-export async function backspaceWord(page) {
-	await page.keyboard.down("Alt")
-	await page.keyboard.press("Backspace", options)
-	await page.keyboard.up("Alt")
-}
-
-export async function backspaceCharForwards(page) {
-	await page.keyboard.press("Delete", options)
-}
-
-export async function backspaceWordForwards(page) {
-	await page.keyboard.down("Alt")
-	await page.keyboard.press("Delete", options)
-	await page.keyboard.up("Alt")
-}
-
-export async function undo(page) {
-	await page.keyboard.down("Meta")
-	await page.keyboard.press("z", options)
-	await page.keyboard.up("Meta")
-}
-
-export async function redo(page) {
-	await page.keyboard.down("Meta")
-	await page.keyboard.down("Shift")
-	await page.keyboard.press("z", options)
-	await page.keyboard.up("Meta")
-	await page.keyboard.up("Shift")
-}
+// export async function undo(page) {
+// 	await page.keyboard.down("Meta")
+// 	await page.keyboard.press("z", OPTIONS)
+// 	await page.keyboard.up("Meta")
+// }
+//
+// export async function redo(page) {
+// 	await page.keyboard.down("Meta")
+// 	await page.keyboard.down("Shift")
+// 	await page.keyboard.press("z", OPTIONS)
+// 	await page.keyboard.up("Meta")
+// 	await page.keyboard.up("Shift")
+// }

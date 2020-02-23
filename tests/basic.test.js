@@ -1,4 +1,5 @@
 import * as ppt from "./playwright"
+import len from "./len"
 
 let page = null
 let done = null
@@ -13,80 +14,92 @@ afterAll(async () => {
 	await done()
 })
 
+beforeEach(async () => {
+	await page.focus("#editor")
+	await page.clear()
+})
+
 test("cannot delete contenteditable", async () => {
-	await ppt.clear(page)
-	await ppt.backspaceChar(page)
-	await ppt.backspaceWord(page)
-	await ppt.backspaceCharForwards(page)
-	await ppt.backspaceWordForwards(page)
-	const data = await ppt.innerText(page)
-	expect(data).toBe("")
+	await page.backspace()
+	await page.backspaceWord()
+	await page.delete()
+	await page.deleteWord()
+	await page.selectAll()
+	await page.backspace()
+	await page.selectAll()
+	await page.backspaceWord()
+	await page.selectAll()
+	await page.delete()
+	await page.selectAll()
+	await page.deleteWord()
+	expect(await page.getCodex("#editor")).toBe("")
 })
 
 test("can select-all delete", async () => {
-	await ppt.clear(page)
-	await ppt.backspaceChar(page)
-	const data = await ppt.innerText(page)
-	expect(data).toBe("")
+	await page.selectAll()
+	await page.backspace()
+	expect(await page.getCodex("#editor")).toBe("")
 })
 
 test("can select-all delete (forwards)", async () => {
-	await ppt.clear(page)
-	await ppt.backspaceCharForwards(page)
-	const data = await ppt.innerText(page)
-	expect(data).toBe("")
+	await page.selectAll()
+	await page.delete()
+	expect(await page.getCodex("#editor")).toBe("")
 })
 
 test("can type and delete characters", async () => {
-	await ppt.clear(page)
-	await ppt.type(page, "Hello, world! 😀\n\nHello, world! 😀\n\nHello, world! 😀")
-	let data = await ppt.innerText(page)
-	expect(data).toBe("Hello, world! 😀\n\nHello, world! 😀\n\nHello, world! 😀")
-	for (let index = 0; index < 52; index++) {
-		await ppt.backspaceChar(page)
-	}
-	data = await ppt.innerText(page)
-	expect(data).toBe("")
+	const data = "Hello, world! 😀\n\nHello, world! 😀\n\nHello, world! 😀"
+	const count = len(data)
+	await page.type(data)
+	expect(await page.getCodex("#editor")).toBe(data)
+	await page.backspace(count)
+	expect(await page.getCodex("#editor")).toBe("")
 })
 
 test("can type and delete (forwards) characters", async () => {
-	await ppt.clear(page)
-	await ppt.type(page, "Hello, world! 😀\n\nHello, world! 😀\n\nHello, world! 😀")
-	let data = await ppt.innerText(page)
-	expect(data).toBe("Hello, world! 😀\n\nHello, world! 😀\n\nHello, world! 😀")
-	for (let index = 0; index < 52; index++) {
-		await ppt.press(page, "ArrowLeft")
-	}
-	for (let index = 0; index < 52; index++) {
-		await ppt.backspaceCharForwards(page)
-	}
-	data = await ppt.innerText(page)
-	expect(data).toBe("")
+	const data = "Hello, world! 😀\n\nHello, world! 😀\n\nHello, world! 😀"
+	const count = len(data)
+	await page.type(data)
+	expect(await page.getCodex("#editor")).toBe(data)
+	await page.left(count)
+	await page.delete(count)
+	expect(await page.getCodex("#editor")).toBe("")
 })
 
-test("can type and delete 100x paragraphs", async () => {
-	await ppt.clear(page)
-	await ppt.type(page, "\n".repeat(100))
-	let data = await ppt.innerText(page)
-	expect(data).toBe("\n".repeat(100))
-	for (let index = 0; index < 100; index++) {
-		await ppt.press(page, "Backspace")
-	}
-	data = await ppt.innerText(page)
-	expect(data).toBe("")
+test("can type and delete 10 paragraphs", async () => {
+	const data = "\n".repeat(10)
+	const count = len(data)
+	await page.type(data)
+	expect(await page.getCodex("#editor")).toBe(data)
+	await page.backspace(count)
+	expect(await page.getCodex("#editor")).toBe("")
 })
 
-test("can type and delete (forwards) 100x paragraphs", async () => {
-	await ppt.clear(page)
-	await ppt.type(page, "\n".repeat(100))
-	let data = await ppt.innerText(page)
-	expect(data).toBe("\n".repeat(100))
-	for (let index = 0; index < 100; index++) {
-		await ppt.press(page, "ArrowLeft")
-	}
-	for (let index = 0; index < 100; index++) {
-		await ppt.press(page, "Delete")
-	}
-	data = await ppt.innerText(page)
-	expect(data).toBe("")
+test("can type and delete (forwards) 10 paragraphs", async () => {
+	const data = "\n".repeat(10)
+	const count = len(data)
+	await page.type(data)
+	expect(await page.getCodex("#editor")).toBe(data)
+	await page.left(count)
+	await page.delete(count)
+	expect(await page.getCodex("#editor")).toBe("")
+})
+
+test("can type and delete 100 paragraphs", async () => {
+	const data = "\n".repeat(100)
+	const count = len(data)
+	await page.type(data)
+	expect(await page.getCodex("#editor")).toBe(data)
+	await page.backspace(count)
+	expect(await page.getCodex("#editor")).toBe("")
+})
+
+test("can type and delete (forwards) 100 paragraphs", async () => {
+	const data = "\n".repeat(100)
+	const count = len(data)
+	await page.type(data)
+	expect(await page.getCodex("#editor")).toBe(data)
+	await page.left(count)
+	await page.delete(count)
+	expect(await page.getCodex("#editor")).toBe("")
 })
