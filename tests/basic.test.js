@@ -1,4 +1,4 @@
-import * as ppt from "../lib/playwright"
+import ppt from "../lib/playwright"
 import runeCount from "../lib/runeCount"
 
 let page = null
@@ -6,8 +6,7 @@ let done = null
 
 beforeAll(async () => {
 	jest.setTimeout(600e3)
-	const browserStr = process.env.BROWSER
-	;[page, done] = await ppt.openPage(browserStr, "http://localhost:3000/demo")
+	;[page, done] = await ppt.newPage("http://localhost:3000/demo")
 })
 
 afterAll(async () => {
