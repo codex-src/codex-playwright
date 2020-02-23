@@ -36,6 +36,7 @@ const ARROW_RIGHT = "ArrowRight"
 const ARROW_UP    = "ArrowUp"
 const BACKSPACE   = "Backspace"
 const DELETE      = "Delete"
+const ENTER       = "Enter"
 const MOD_ALT     = "Alt"
 const MOD_META    = "Meta"
 /* eslint-enable no-multi-spaces */
@@ -95,9 +96,9 @@ class Page {
 	}
 	// Selects all character data.
 	async selectAll() {
-		await this.page.keyboard.down("Meta")
-		await this.page.keyboard.press("a")
-		await this.page.keyboard.up("Meta")
+		await this.page.keyboard.down(MOD_META)
+		await this.page.keyboard.press("a", OPTIONS)
+		await this.page.keyboard.up(MOD_META)
 		try {
 			// https://github.com/microsoft/playwright/issues/849
 			await this.page.evaluate(() => document.execCommand("selectall", false, null))
@@ -113,65 +114,64 @@ class Page {
 	// Arrows left up to count times.
 	async left(count = 1) {
 		for (let index = 0; index < count; index++) {
-			await this.page.keyboard.press(ARROW_LEFT)
+			await this.page.keyboard.press(ARROW_LEFT, OPTIONS)
 		}
 	}
 	// Arrows right up to count times.
 	async right(count = 1) {
 		for (let index = 0; index < count; index++) {
-			await this.page.keyboard.press(ARROW_RIGHT)
+			await this.page.keyboard.press(ARROW_RIGHT, OPTIONS)
 		}
 	}
 	// Arrows up up to count times.
 	async up(count = 1) {
 		for (let index = 0; index < count; index++) {
-			await this.page.keyboard.press(ARROW_UP)
+			await this.page.keyboard.press(ARROW_UP, OPTIONS)
 		}
 	}
 	// Arrows down up to count times.
 	async down(count = 1) {
 		for (let index = 0; index < count; index++) {
-			await this.page.keyboard.press(ARROW_DOWN)
+			await this.page.keyboard.press(ARROW_DOWN, OPTIONS)
 		}
 	}
 	// Types character data.
 	async type(data) {
-		// NOTE: Do not use page.keyboard.type for paragraphs;
-		// 😀<Enter> does not work as expected (because of
-		// onKeyDown)
-		const arr = data.split("\n")
-		for (let index = 0; index < arr.length; index++) {
-			if (index) {
-				// // https://stackoverflow.com/a/39914235
-				// await new Promise(r => setTimeout(r, 10))
-				await this.page.waitFor(0)
-				await this.page.keyboard.press("Enter")
-			}
-			await this.page.keyboard.type(arr[index])
-		}
+		// // NOTE: Do not use page.keyboard.type for paragraphs;
+		// // 😀<Enter> does not work as expected (because of
+		// // onKeyDown)
+		// for (const [index, each] of data.split("\n").entries()) {
+		// 	if (index) {
+		// 		// https://stackoverflow.com/a/39914235
+		// 		await new Promise(r => setTimeout(r, 0))
+		// 		await this.page.keyboard.press(ENTER, OPTIONS)
+		// 	}
+		// 	await this.page.keyboard.type(each, OPTIONS)
+		// }
+		await this.page.keyboard.type(data, OPTIONS)
 	}
 	// Deletes up to count characters.
 	async backspace(count = 1) {
 		for (let index = 0; index < count; index++) {
-			await this.page.keyboard.press(BACKSPACE)
+			await this.page.keyboard.press(BACKSPACE, OPTIONS)
 		}
 	}
 	// Deletes one word.
 	async backspaceWord() {
 		await this.page.keyboard.down(MOD_ALT)
-		await this.page.keyboard.press(BACKSPACE)
+		await this.page.keyboard.press(BACKSPACE, OPTIONS)
 		await this.page.keyboard.up(MOD_ALT)
 	}
 	// Deletes up to count characters (forwards).
 	async delete(count = 1) {
 		for (let index = 0; index < count; index++) {
-			await this.page.keyboard.press(DELETE)
+			await this.page.keyboard.press(DELETE, OPTIONS)
 		}
 	}
 	// Deletes one word (forwards).
 	async deleteWord() {
 		await this.page.keyboard.down(MOD_ALT)
-		await this.page.keyboard.press(DELETE)
+		await this.page.keyboard.press(DELETE, OPTIONS)
 		await this.page.keyboard.up(MOD_ALT)
 	}
 }

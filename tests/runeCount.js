@@ -1,6 +1,6 @@
 import emoji from "emoji-trie"
 
-function len(str) {
+function runeCount(str) {
 	let length = 0
 	for (let index = 0; index < str.length;) {
 		const substr = str.slice(index)
@@ -11,4 +11,4 @@ function len(str) {
 	return length
 }
 
-export default len
+export default runeCount

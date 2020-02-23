@@ -1,5 +1,5 @@
 import * as ppt from "./playwright"
-import len from "./len"
+import runeCount from "./runeCount"
 
 let page = null
 let done = null
@@ -19,46 +19,18 @@ beforeEach(async () => {
 	await page.clear()
 })
 
-test("cannot delete contenteditable", async () => {
-	await page.backspace()
-	await page.backspaceWord()
-	await page.delete()
-	await page.deleteWord()
-	await page.selectAll()
-	await page.backspace()
-	await page.selectAll()
-	await page.backspaceWord()
-	await page.selectAll()
-	await page.delete()
-	await page.selectAll()
-	await page.deleteWord()
-	expect(await page.getCodex("#editor")).toBe("")
-})
-
-test("can select-all delete", async () => {
-	await page.selectAll()
-	await page.backspace()
-	expect(await page.getCodex("#editor")).toBe("")
-})
-
-test("can select-all delete (forwards)", async () => {
-	await page.selectAll()
-	await page.delete()
+test("can type and backspace characters", async () => {
+	const data = "Hello, world! 😀\n\nHello, world! 😀\n\nHello, world! 😀"
+	const count = runeCount(data)
+	await page.type(data)
+	expect(await page.getCodex("#editor")).toBe(data)
+	await page.backspace(count)
 	expect(await page.getCodex("#editor")).toBe("")
 })
 
 test("can type and delete characters", async () => {
 	const data = "Hello, world! 😀\n\nHello, world! 😀\n\nHello, world! 😀"
-	const count = len(data)
-	await page.type(data)
-	expect(await page.getCodex("#editor")).toBe(data)
-	await page.backspace(count)
-	expect(await page.getCodex("#editor")).toBe("")
-})
-
-test("can type and delete (forwards) characters", async () => {
-	const data = "Hello, world! 😀\n\nHello, world! 😀\n\nHello, world! 😀"
-	const count = len(data)
+	const count = runeCount(data)
 	await page.type(data)
 	expect(await page.getCodex("#editor")).toBe(data)
 	await page.left(count)
@@ -66,37 +38,18 @@ test("can type and delete (forwards) characters", async () => {
 	expect(await page.getCodex("#editor")).toBe("")
 })
 
-test("can type and delete 10 paragraphs", async () => {
-	const data = "\n".repeat(10)
-	const count = len(data)
+test("can type and backspace 100 paragraphs", async () => {
+	const data = "\n".repeat(100)
+	const count = runeCount(data)
 	await page.type(data)
 	expect(await page.getCodex("#editor")).toBe(data)
 	await page.backspace(count)
-	expect(await page.getCodex("#editor")).toBe("")
-})
-
-test("can type and delete (forwards) 10 paragraphs", async () => {
-	const data = "\n".repeat(10)
-	const count = len(data)
-	await page.type(data)
-	expect(await page.getCodex("#editor")).toBe(data)
-	await page.left(count)
-	await page.delete(count)
 	expect(await page.getCodex("#editor")).toBe("")
 })
 
 test("can type and delete 100 paragraphs", async () => {
 	const data = "\n".repeat(100)
-	const count = len(data)
-	await page.type(data)
-	expect(await page.getCodex("#editor")).toBe(data)
-	await page.backspace(count)
-	expect(await page.getCodex("#editor")).toBe("")
-})
-
-test("can type and delete (forwards) 100 paragraphs", async () => {
-	const data = "\n".repeat(100)
-	const count = len(data)
+	const count = runeCount(data)
 	await page.type(data)
 	expect(await page.getCodex("#editor")).toBe(data)
 	await page.left(count)
