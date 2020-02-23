@@ -1,5 +1,5 @@
-import * as ppt from "./playwright"
-import runeCount from "./runeCount"
+import * as ppt from "../lib/playwright"
+import runeCount from "../lib/runeCount"
 
 let page = null
 let done = null
