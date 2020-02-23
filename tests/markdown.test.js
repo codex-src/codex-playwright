@@ -46,7 +46,7 @@ test("can type, backspace, and delete blockquotes", async () => {
 })
 
 test("can type, backspace, and delete code blocks", async () => {
-	const data = "```\nHello, world! 😀\n```\n```go\nHello, world! 😀\n```"
+	const data = "```\nHello, world! 😀\n```\n```go\nHello, world! 😀\n```\n```main.go\nHello, world! 😀\n```"
 	const count = runeCount(data)
 	await page.type(data)
 	expect(await page.getCodex("#editor")).toBe(data)
