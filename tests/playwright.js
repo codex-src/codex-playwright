@@ -31,37 +31,46 @@ const options = { delay: +(process.env.DELAY || 16.67) }
 
 // Opens a new page from a browser string and a URL.
 export async function openPage(browserStr, url) {
-	const browserType = browserTypes[browserStr]
-	const args = []
-	if (browserType === Chrome) {
-		args.push("--window-size=1440,900")
-	} else if (browserType === Firefox) {
-		args.push("-width=1440", "-height=900")
+	let page = null
+	let done = null
+	try {
+		if (!browserStr || browserStr === undefined) {
+			console.warn("Try BROWSER=Chrome ...")
+		}
+		const browserType = browserTypes[browserStr]
+		const args = []
+		if (browserType === Chrome) {
+			args.push("--window-size=1440,900")
+		} else if (browserType === Firefox) {
+			args.push("-width=1440", "-height=900")
+		}
+		const config = {
+			headless: process.env.HEADLESS === "true" || false,
+			args,
+		}
+		const browser = await browserType.launch(config)
+		const context = await browser.newContext()
+		const page = await context.newPage(url)
+		if (!config.headless && browserType === Firefox) {
+			execSync("osascript -e 'activate application \"Nightly\"'")
+		}
+		await page.setViewport({ width: 1440, height: 900 }) // , deviceScaleFactor: 2 })
+		await page.waitFor(1e3, options)
+		page.on("pageerror", error => expect(error).toBeNull())
+		done = browser.close // async?
+	} catch (e) {
+		console.warn(e)
 	}
-	const config = {
-		headless: process.env.HEADLESS === "true" || false,
-		args,
-	}
-	const browser = await browserType.launch(config)
-	const context = await browser.newContext()
-	const page = await context.newPage(url)
-	if (!config.headless && browserType === Firefox) {
-		execSync("osascript -e 'activate application \"Nightly\"'")
-	}
-	await page.setViewport({ width: 1440, height: 900 }) // , deviceScaleFactor: 2 })
-	await page.addScriptTag({ path: "./src/components/Editor/__tests/innerText.js" })
-	await page.waitFor(1e3, options)
-	page.on("pageerror", error => expect(error).toBeNull())
-	return [page, () => browser.close()]
+	return [page, done]
 }
 
 // ./src/components/Editor/helpers/innerText.js
 export async function innerText(page) {
-	return await page.$eval(".codex-editor", node => innerText(node))
+	return await page.$eval("#editor", node => window.getCodex(node))
 }
 
 export async function clear(page) {
-	await page.focus(".codex-editor")
+	await page.focus("#editor")
 	await page.keyboard.down("Meta")
 	await page.keyboard.press("a", options)
 	await page.keyboard.up("Meta")

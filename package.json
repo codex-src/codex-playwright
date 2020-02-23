@@ -1,11 +1,14 @@
 {
   "name": "codex-playwright",
-  "version": "1.0.0",
-  "main": "index.js",
   "repository": "https://github.com/codex-src/codex-playwright.git",
   "author": "Zaydek Michels-Gualtieri <zaydekdotcom+codex-zaydek@gmail.com>",
   "license": "MIT",
   "devDependencies": {
+    "@babel/core": "^7.8.4",
+    "@babel/preset-env": "^7.8.4",
+    "babel-eslint": "^10.0.3",
+    "babel-jest": "^25.1.0",
+    "jest": "^25.1.0",
     "playwright": "0.10"
   }
 }
