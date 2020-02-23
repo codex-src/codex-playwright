@@ -28,24 +28,6 @@ test("can type and backspace smileys", async () => {
 	expect(await page.getCodex("#editor")).toBe("")
 })
 
-test("can type and backspace handshakes", async () => {
-	const data = "🧑‍🤝‍🧑🧑🏻‍🤝‍🧑🏻🧑🏻‍🤝‍🧑🏼🧑🏻‍🤝‍🧑🏽🧑🏻‍🤝‍🧑🏾🧑🏻‍🤝‍🧑🏿🧑🏼‍🤝‍🧑🏻🧑🏼‍🤝‍🧑🏼🧑🏼‍🤝‍🧑🏽🧑🏼‍🤝‍🧑🏾🧑🏼‍🤝‍🧑🏿🧑🏽‍🤝‍🧑🏻🧑🏽‍🤝‍🧑🏼🧑🏽‍🤝‍🧑🏽🧑🏽‍🤝‍🧑🏾🧑🏽‍🤝‍🧑🏿🧑🏾‍🤝‍🧑🏻🧑🏾‍🤝‍🧑🏼🧑🏾‍🤝‍🧑🏽🧑🏾‍🤝‍🧑🏾🧑🏾‍🤝‍🧑🏿🧑🏿‍🤝‍🧑🏻🧑🏿‍🤝‍🧑🏼🧑🏿‍🤝‍🧑🏽🧑🏿‍🤝‍🧑🏾🧑🏿‍🤝‍🧑🏿"
-	const count = runeCount(data)
-	await page.type(data)
-	expect(await page.getCodex("#editor")).toBe(data)
-	await page.backspace(count)
-	expect(await page.getCodex("#editor")).toBe("")
-})
-
-test("can type and backspace flags", async () => {
-	const data = "\u{1F3F4}\u{E0067}\u{E0062}\u{E0065}\u{E006E}\u{E0067}\u{E007F}\u{1F3F4}\u{E0067}\u{E0062}\u{E0073}\u{E0063}\u{E0074}\u{E007F}\u{1F3F4}\u{E0067}\u{E0062}\u{E0077}\u{E006C}\u{E0073}\u{E007F}"
-	const count = runeCount(data)
-	await page.type(data)
-	expect(await page.getCodex("#editor")).toBe(data)
-	await page.backspace(count)
-	expect(await page.getCodex("#editor")).toBe("")
-})
-
 test("can type and delete smileys", async () => {
 	const data = "😀😃😄😁😆😅🤣😂🙂🙃😉😊😇"
 	const count = runeCount(data)
@@ -56,13 +38,31 @@ test("can type and delete smileys", async () => {
 	expect(await page.getCodex("#editor")).toBe("")
 })
 
-test("can type and delete handshakes", async () => {
+test("can type and backspace handshakes", async () => {
 	const data = "🧑‍🤝‍🧑🧑🏻‍🤝‍🧑🏻🧑🏻‍🤝‍🧑🏼🧑🏻‍🤝‍🧑🏽🧑🏻‍🤝‍🧑🏾🧑🏻‍🤝‍🧑🏿🧑🏼‍🤝‍🧑🏻🧑🏼‍🤝‍🧑🏼🧑🏼‍🤝‍🧑🏽🧑🏼‍🤝‍🧑🏾🧑🏼‍🤝‍🧑🏿🧑🏽‍🤝‍🧑🏻🧑🏽‍🤝‍🧑🏼🧑🏽‍🤝‍🧑🏽🧑🏽‍🤝‍🧑🏾🧑🏽‍🤝‍🧑🏿🧑🏾‍🤝‍🧑🏻🧑🏾‍🤝‍🧑🏼🧑🏾‍🤝‍🧑🏽🧑🏾‍🤝‍🧑🏾🧑🏾‍🤝‍🧑🏿🧑🏿‍🤝‍🧑🏻🧑🏿‍🤝‍🧑🏼🧑🏿‍🤝‍🧑🏽🧑🏿‍🤝‍🧑🏾🧑🏿‍🤝‍🧑🏿"
 	const count = runeCount(data)
 	await page.type(data)
 	expect(await page.getCodex("#editor")).toBe(data)
+	await page.backspace(count)
+	expect(await page.getCodex("#editor")).toBe("")
+})
+
+test("can type and delete handshakes", async () => {
+	const data = "🧑‍🤝‍🧑🧑🏻‍🤝‍🧑🏻🧑🏻‍🤝‍🧑🏼🧑🏻‍🤝‍🧑🏽🧑🏻‍🤝‍🧑🏾🧑🏻‍🤝‍🧑🏿🧑🏼‍🤝‍🧑🏻🧑🏼‍🤝‍🧑🏼🧑🏼‍🤝‍🧑🏽🧑🏼‍🤝‍🧑🏾🧑🏼‍🤝‍🧑🏿🧑🏽‍🤝‍🧑🏻🧑🏽‍🤝‍🧑🏼🧑🏽‍🤝‍🧑🏽🧑🏽‍🤝‍🧑🏾🧑🏽‍🤝‍🧑🏿🧑🏾‍🤝‍🧑🏻🧑🏾‍🤝‍🧑🏼🧑🏾‍🤝‍🧑🏽🧑🏾‍🤝‍🧑🏾🧑🏾‍🤝‍🧑🏿🧑🏿‍🤝‍🧑🏻🧑🏿‍🤝‍🧑🏼🧑🏿‍🤝‍🧑🏽🧑🏿‍🤝‍🧑🏾🧑🏿‍🤝‍🧑🏿"
+	const count = runeCount(data) + (process.env.BROWSER === "Firefox" ? 2 : 0)
+	await page.type(data)
+	expect(await page.getCodex("#editor")).toBe(data)
 	await page.left(count)
 	await page.delete(count)
+	expect(await page.getCodex("#editor")).toBe("")
+})
+
+test("can type and backspace flags", async () => {
+	const data = "\u{1F3F4}\u{E0067}\u{E0062}\u{E0065}\u{E006E}\u{E0067}\u{E007F}\u{1F3F4}\u{E0067}\u{E0062}\u{E0073}\u{E0063}\u{E0074}\u{E007F}\u{1F3F4}\u{E0067}\u{E0062}\u{E0077}\u{E006C}\u{E0073}\u{E007F}"
+	const count = runeCount(data)
+	await page.type(data)
+	expect(await page.getCodex("#editor")).toBe(data)
+	await page.backspace(count)
 	expect(await page.getCodex("#editor")).toBe("")
 })
 
